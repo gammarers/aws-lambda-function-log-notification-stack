@@ -48,4 +48,6 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+/assets/
+!/src/funcs/notification-function.ts
 !/.projenrc.ts
