@@ -49,6 +49,14 @@ exports[`hello 1`] = `
         },
         "FunctionName": "lambda-function-log-notification-72197c83-func",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "INFO",
+          "LogFormat": "JSON",
+          "LogGroup": {
+            "Ref": "NotificationFunctionLogGroup73EE8F77",
+          },
+          "SystemLogLevel": "INFO",
+        },
         "Role": {
           "Fn::GetAtt": [
             "NotificationLambdaExecutionRole6DE166BB",
@@ -59,6 +67,14 @@ exports[`hello 1`] = `
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "NotificationFunctionLogGroup73EE8F77": {
+      "DeletionPolicy": "RetainExceptOnCreate",
+      "Properties": {
+        "RetentionInDays": 90,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
     },
     "NotificationLambdaExecutionRole6DE166BB": {
       "Properties": {
