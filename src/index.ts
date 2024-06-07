@@ -50,9 +50,9 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
           iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
         ],
       }),
-    //      logFormat: lambda.LogFormat.JSON,
-    //      systemLogLevel: lambda.SystemLogLevel.INFO,
-    //      applicationLogLevel: lambda.ApplicationLogLevel.INFO,
+      logFormat: lambda.LogFormat.JSON,
+      systemLogLevel: lambda.SystemLogLevel.INFO,
+      applicationLogLevel: lambda.ApplicationLogLevel.INFO,
     });
 
     // サブスクリプションフィルターの作成
