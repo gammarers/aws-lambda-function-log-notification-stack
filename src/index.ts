@@ -50,6 +50,11 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
           iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
         ],
       }),
+      logGroup: new logs.LogGroup(this, 'NotificationFunctionLogGroup', {
+        // logGroupName: lambdaFunction.logGroup.logGroupName,
+        retention: logs.RetentionDays.THREE_MONTHS,
+        removalPolicy: cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
+      }),
       logFormat: lambda.LogFormat.JSON,
       systemLogLevel: lambda.SystemLogLevel.INFO,
       applicationLogLevel: lambda.ApplicationLogLevel.INFO,
