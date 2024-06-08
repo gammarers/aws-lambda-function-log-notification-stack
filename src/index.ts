@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as cdk from 'aws-cdk-lib';
+import * as events from 'aws-cdk-lib/aws-events';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
@@ -67,6 +68,30 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       logGroup: logs.LogGroup.fromLogGroupName(this, 'LogGroup', props.logGroupName),
       destination: new destinations.LambdaDestination(notificationFunction),
       filterPattern: logs.FilterPattern.literal('{ $.level = "ERROR" || $.level = "WARN" }'),
+    });
+
+    // EventBridge Rule
+    new events.Rule(this, 'LambdaFunctionLogSubscriptionFuncFailureRule', {
+      ruleName: `lambda-func-log-subscription-${random}-func-failure-rule`,
+      eventPattern: {
+        source: ['lambda'],
+        detailType: ['Lambda Function Invocation Result - Failure'],
+        resources: [
+          notificationFunction.functionArn,
+        ],
+      },
+    });
+
+    // EventBridge Rule
+    new events.Rule(this, 'LambdaFunctionLogSubscriptionFuncSuccessRule', {
+      ruleName: `lambda-func-log-subscription-${random}-func-success-rule`,
+      eventPattern: {
+        source: ['lambda'],
+        detailType: ['Lambda Function Invocation Result - Success'],
+        resources: [
+          notificationFunction.functionArn,
+        ],
+      },
     });
   }
 }
