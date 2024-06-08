@@ -3,8 +3,9 @@ import * as cdk from 'aws-cdk-lib';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaDestinations from 'aws-cdk-lib/aws-lambda-destinations';
 import * as logs from 'aws-cdk-lib/aws-logs';
-import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
+import * as logsDestinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Construct } from 'constructs';
@@ -23,6 +24,9 @@ export interface LambdaFunctionLogNotificationStackProps extends cdk.StackProps 
 export class LambdaFunctionLogNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: LambdaFunctionLogNotificationStackProps) {
     super(scope, id, props);
+
+    const account = this.account;
+    const region = this.region;
 
     const random = crypto.createHash('shake256', { outputLength: 4 })
       .update(cdk.Names.uniqueId(scope) + cdk.Names.uniqueId(this))
@@ -52,6 +56,17 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
         managedPolicies: [
           iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
         ],
+        inlinePolicies: {
+          ['failure-destination-event-bridge-policy']: new iam.PolicyDocument({
+            statements: [
+              new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ['events:PutEvents'],
+                resources: [`arn:aws:events:${region}:${account}:event-bus/default`],
+              }),
+            ],
+          }),
+        },
       }),
       logGroup: new logs.LogGroup(this, 'LogNotificationFunctionLogGroup', {
         logGroupName: `/aws/lambda/${functionName}`,
@@ -61,12 +76,14 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       logFormat: lambda.LogFormat.JSON,
       systemLogLevel: lambda.SystemLogLevel.INFO,
       applicationLogLevel: lambda.ApplicationLogLevel.INFO,
+      onSuccess: new lambdaDestinations.EventBridgeDestination(),
+      onFailure: new lambdaDestinations.EventBridgeDestination(),
     });
 
     // サブスクリプションフィルターの作成
     new logs.SubscriptionFilter(this, 'SubscriptionFilter', {
       logGroup: logs.LogGroup.fromLogGroupName(this, 'LogGroup', props.logGroupName),
-      destination: new destinations.LambdaDestination(notificationFunction),
+      destination: new logsDestinations.LambdaDestination(notificationFunction),
       filterPattern: logs.FilterPattern.literal('{ $.level = "ERROR" || $.level = "WARN" }'),
     });
 
@@ -77,7 +94,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
         source: ['lambda'],
         detailType: ['Lambda Function Invocation Result - Failure'],
         resources: [
-          notificationFunction.functionArn,
+          `${notificationFunction.functionArn}:*`,
         ],
       },
     });
@@ -89,7 +106,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
         source: ['lambda'],
         detailType: ['Lambda Function Invocation Result - Success'],
         resources: [
-          notificationFunction.functionArn,
+          `${notificationFunction.functionArn}:*`,
         ],
       },
     });
