@@ -12,6 +12,9 @@ const project = new awscdk.AwsCdkConstructLibrary({
   repositoryUrl: 'https://github.com/gammarers/aws-lambda-function-log-notification-stack.git',
   releaseToNpm: false, // temporary
   depsUpgrade: false, // temporary
+  devDeps: [
+    '@types/aws-lambda@^8.10.136',
+  ],
   minNodeVersion: '18.0.0',
   workflowNodeVersion: '22.2.0',
 });
