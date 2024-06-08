@@ -98,12 +98,12 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
           sfn.JsonPath.stringAt('$.account'),
           sfn.JsonPath.stringAt('$.region'),
         ),
-        Message: sfn.JsonPath.format('Account : {}\nRegion : {}\nFunction : {}\nErrorMessage : {}\nTrace : \n{}',
+        Message: sfn.JsonPath.format('Account : {}\nRegion : {}\nFunction : {}\nErrorMessage : {}\nStackTrace : \n{}',
           sfn.JsonPath.stringAt('$.account'),
           sfn.JsonPath.stringAt('$.region'),
           sfn.JsonPath.stringAt('$.detail.requestContext.functionArn'),
           sfn.JsonPath.stringAt('$.detail.responsePayload.errorMessage'),
-          sfn.JsonPath.stringAt('$.Prepare.Concatenated.Trace'),
+          sfn.JsonPath.stringAt('$.Prepare.Concatenated.StackTrace'),
         ),
       },
       resultPath: '$.Prepare.Sns.Topic',
@@ -111,7 +111,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
 
     const init: sfn.Pass = new sfn.Pass(this, 'Init', {
       result: sfn.Result.fromString(''),
-      resultPath: '$.Prepare.Concatenated.Trace',
+      resultPath: '$.Prepare.Concatenated.StackTrace',
     });
 
     // ----
@@ -142,7 +142,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
     // String to json
     const getLogEventMessage: sfn.Pass = new sfn.Pass(this, 'GetLogEventMessage', {
       parameters: {
-        Message: sfn.JsonPath.stringToJson(sfn.JsonPath.stringAt('$.Temp.Log.Event.Detail')),
+        Message: sfn.JsonPath.stringToJson(sfn.JsonPath.stringAt('$.Temp.Log.Event.Detail.message')),
       },
       resultPath: '$.Temp.Log.Event',
     });
@@ -150,36 +150,36 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
     getLogEventDetail.next(getLogEventMessage);
 
     // String to json
-    const getLogEventMessageTrace: sfn.Pass = new sfn.Pass(this, 'GetLogEventMessageTrace', {
+    const getLogEventMessageStackTrace: sfn.Pass = new sfn.Pass(this, 'GetLogEventMessageStackTrace', {
       parameters: {
-        Lines: sfn.JsonPath.stringAt('$.Temp.Log.Event.Message.Trace'),
+        Lines: sfn.JsonPath.stringAt('$.Temp.Log.Event.Message.stackTrace'),
       },
-      resultPath: '$.Temp.Trace',
+      resultPath: '$.Temp.StackTrace',
     });
 
-    getLogEventMessage.next(getLogEventMessageTrace);
+    getLogEventMessage.next(getLogEventMessageStackTrace);
 
-    const getLogEventMessageTraceLine = new sfn.Pass(this, 'GetTraceLine', {
+    const getLogEventMessageStackTraceLine = new sfn.Pass(this, 'GetLogEventMessageStackTraceLine', {
       parameters: {
-        Line: sfn.JsonPath.arrayGetItem(sfn.JsonPath.stringAt('$.TempTrace.Lines'), 0),
+        Line: sfn.JsonPath.arrayGetItem(sfn.JsonPath.stringAt('$.TempStackTrace.Lines'), 0),
       },
-      resultPath: '$.Temp.GetTrace',
+      resultPath: '$.Temp.GetStackTrace',
     });
 
     const checkUntreatedMessageTranceLinesExist: sfn.Choice = new sfn.Choice(this, 'CheckUntreatedTranceLinesExist')
-      .when(sfn.Condition.isPresent('$.Temp.Trace.Lines[0]'), getLogEventMessageTraceLine)
+      .when(sfn.Condition.isPresent('$.Temp.Trace.Lines[0]'), getLogEventMessageStackTraceLine)
       .otherwise(prepareMessage);
 
-    getLogEventMessageTrace.next(checkUntreatedMessageTranceLinesExist);
+    getLogEventMessageStackTrace.next(checkUntreatedMessageTranceLinesExist);
 
-    const concatenateTraceLine: sfn.Pass = new sfn.Pass(this, 'ConcatenateTraceLine', {
+    const concatenateStackTraceLine: sfn.Pass = new sfn.Pass(this, 'ConcatenateStackTraceLine', {
       parameters: {
-        Trace: sfn.JsonPath.format('{}{}\n', sfn.JsonPath.stringAt('$.Prepare.Concatenated.Trace'), sfn.JsonPath.stringAt('$.Temp.GetTrace.Line')),
+        StackTrace: sfn.JsonPath.format('{}{}\n', sfn.JsonPath.stringAt('$.Prepare.Concatenated.StackTrace'), sfn.JsonPath.stringAt('$.Temp.GetStackTrace.Line')),
       },
       resultPath: '$.Prepare.Concatenated',
     });
 
-    getLogEventMessageTraceLine.next(concatenateTraceLine);
+    getLogEventMessageStackTraceLine.next(concatenateStackTraceLine);
 
     const getUntreatedMessageTranceLines: sfn.Pass = new sfn.Pass(this, 'UntreatedMessageTranceLines', {
       parameters: {
@@ -188,7 +188,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       resultPath: '$.Temp.Log',
     });
 
-    concatenateTraceLine.next(getUntreatedMessageTranceLines);
+    concatenateStackTraceLine.next(getUntreatedMessageTranceLines);
     getUntreatedMessageTranceLines.next(checkUntreatedMessageTranceLinesExist);
 
     const sendNotification: tasks.SnsPublish = new tasks.SnsPublish(this, 'SendNotification', {
@@ -203,9 +203,9 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
 
     const getUntreatedMessages: sfn.Pass = new sfn.Pass(this, 'GetUntreatedMessages', {
       parameters: {
-        Lines: sfn.JsonPath.stringAt('$.TempTrace.Lines[1:]'),
+        Lines: sfn.JsonPath.stringAt('$.TempStackTrace.Lines[1:]'),
       },
-      resultPath: '$.TempTrace',
+      resultPath: '$.TempStackTrace',
     });
 
     getUntreatedMessages.next(checkUntreatedLogEventDetailExist);
