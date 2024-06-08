@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import * as cdk from 'aws-cdk-lib';
 import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaDestinations from 'aws-cdk-lib/aws-lambda-destinations';
@@ -8,6 +9,8 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import * as logsDestinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
+import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { NotificationFunction } from './funcs/notification-function';
 
@@ -87,6 +90,135 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       filterPattern: logs.FilterPattern.literal('{ $.level = "ERROR" || $.level = "WARN" }'),
     });
 
+    // stepfunction
+    // Prepare Message
+    const prepareMessage: sfn.Pass = new sfn.Pass(this, 'PrepareMessage', {
+      parameters: {
+        Subject: sfn.JsonPath.format('😵 [Failur] AWS Lambda Function Invocation Failur Notification [{}][{}]',
+          sfn.JsonPath.stringAt('$.account'),
+          sfn.JsonPath.stringAt('$.region'),
+        ),
+        Message: sfn.JsonPath.format('Account : {}\nRegion : {}\nFunction : {}\nErrorMessage : {}\nTrace : \n{}',
+          sfn.JsonPath.stringAt('$.account'),
+          sfn.JsonPath.stringAt('$.region'),
+          sfn.JsonPath.stringAt('$.detail.requestContext.functionArn'),
+          sfn.JsonPath.stringAt('$.detail.responsePayload.errorMessage'),
+          sfn.JsonPath.stringAt('$.Prepare.Concatenated.Trace'),
+        ),
+      },
+      resultPath: '$.Prepare.Sns.Topic',
+    });
+
+    const init: sfn.Pass = new sfn.Pass(this, 'Init', {
+      result: sfn.Result.fromString(''),
+      resultPath: '$.Prepare.Concatenated.Trace',
+    });
+
+    // ----
+    // Get Log Events
+    const getLogEvents = new sfn.Pass(this, 'GetLogEvents', {
+      parameters: {
+        Events: sfn.JsonPath.stringAt('$.detail.responsePayload.logEvents'),
+      },
+      resultPath: '$.Temp.Log',
+    });
+
+    init.next(getLogEvents);
+
+    const getLogEventDetail = new sfn.Pass(this, 'GetLogEventDetail', {
+      parameters: {
+        Detail: sfn.JsonPath.arrayGetItem(sfn.JsonPath.stringAt('$.Temp.Log.Events'), 0),
+      },
+      resultPath: '$.Temp.Log.Event',
+    });
+
+    const checkUntreatedLogEventDetailExist: sfn.Choice = new sfn.Choice(this, 'CheckUntreatedLogEventDetailExist')
+      .when(sfn.Condition.isPresent('$.Temp.Log.Events[0]'), getLogEventDetail)
+      .otherwise(new sfn.Succeed(this, 'Succeed'));
+
+    getLogEvents.next(checkUntreatedLogEventDetailExist);
+
+
+    // String to json
+    const getLogEventMessage: sfn.Pass = new sfn.Pass(this, 'GetLogEventMessage', {
+      parameters: {
+        Message: sfn.JsonPath.stringToJson(sfn.JsonPath.stringAt('$.Temp.Log.Event.Detail')),
+      },
+      resultPath: '$.Temp.Log.Event',
+    });
+
+    getLogEventDetail.next(getLogEventMessage);
+
+    // String to json
+    const getLogEventMessageTrace: sfn.Pass = new sfn.Pass(this, 'GetLogEventMessageTrace', {
+      parameters: {
+        Lines: sfn.JsonPath.stringAt('$.Temp.Log.Event.Message.Trace'),
+      },
+      resultPath: '$.Temp.Trace',
+    });
+
+    getLogEventMessage.next(getLogEventMessageTrace);
+
+    const getLogEventMessageTraceLine = new sfn.Pass(this, 'GetTraceLine', {
+      parameters: {
+        Line: sfn.JsonPath.arrayGetItem(sfn.JsonPath.stringAt('$.TempTrace.Lines'), 0),
+      },
+      resultPath: '$.Temp.GetTrace',
+    });
+
+    const checkUntreatedMessageTranceLinesExist: sfn.Choice = new sfn.Choice(this, 'CheckUntreatedTranceLinesExist')
+      .when(sfn.Condition.isPresent('$.Temp.Trace.Lines[0]'), getLogEventMessageTraceLine)
+      .otherwise(prepareMessage);
+
+    getLogEventMessageTrace.next(checkUntreatedMessageTranceLinesExist);
+
+    const concatenateTraceLine: sfn.Pass = new sfn.Pass(this, 'ConcatenateTraceLine', {
+      parameters: {
+        Trace: sfn.JsonPath.format('{}{}\n', sfn.JsonPath.stringAt('$.Prepare.Concatenated.Trace'), sfn.JsonPath.stringAt('$.Temp.GetTrace.Line')),
+      },
+      resultPath: '$.Prepare.Concatenated',
+    });
+
+    getLogEventMessageTraceLine.next(concatenateTraceLine);
+
+    const getUntreatedMessageTranceLines: sfn.Pass = new sfn.Pass(this, 'UntreatedMessageTranceLines', {
+      parameters: {
+        Events: sfn.JsonPath.stringAt('$.Temp.Log.Events[1:]'),
+      },
+      resultPath: '$.Temp.Log',
+    });
+
+    concatenateTraceLine.next(getUntreatedMessageTranceLines);
+    getUntreatedMessageTranceLines.next(checkUntreatedMessageTranceLinesExist);
+
+    const sendNotification: tasks.SnsPublish = new tasks.SnsPublish(this, 'SendNotification', {
+      topic: topic,
+      inputPath: '$.Prepare.Sns.Topic',
+      subject: sfn.JsonPath.stringAt('$.Subject'),
+      message: sfn.TaskInput.fromJsonPathAt('$.Message'),
+      resultPath: '$.Result.Sns.Topic',
+    });
+
+    prepareMessage.next(sendNotification);
+
+    const getUntreatedMessages: sfn.Pass = new sfn.Pass(this, 'GetUntreatedMessages', {
+      parameters: {
+        Lines: sfn.JsonPath.stringAt('$.TempTrace.Lines[1:]'),
+      },
+      resultPath: '$.TempTrace',
+    });
+
+    getUntreatedMessages.next(checkUntreatedLogEventDetailExist);
+
+    sendNotification.next(getUntreatedMessages);
+
+    // Step Functions State Machine
+    const stateMachine: sfn.StateMachine = new sfn.StateMachine(this, 'StateMachine', {
+      stateMachineName: `lambda-func-log-subscription-notification-${random}-state-machine`,
+      timeout: cdk.Duration.minutes(5),
+      definitionBody: sfn.DefinitionBody.fromChainable(init),
+    });
+
     // Lambda Function Invocation Failure EventBridge Rule
     new events.Rule(this, 'LambdaFunctionLogSubscriptionFuncFailureRule', {
       ruleName: `lambda-func-log-subscription-${random}-func-failure-rule`,
@@ -117,6 +249,28 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
           },
         },
       },
+      targets: [
+        new targets.SfnStateMachine(stateMachine, {
+          role: new iam.Role(this, 'StartExecMachineRole', {
+            roleName: `log-notification-start-exec-machine-${random}-role`,
+            description: 'lambda func log subscription notification start exec machine (send notification).',
+            assumedBy: new iam.ServicePrincipal('events.amazonaws.com'),
+            inlinePolicies: {
+              'states-start-execution-policy': new iam.PolicyDocument({
+                statements: [
+                  new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: [
+                      'states:StartExecution',
+                    ],
+                    resources: ['*'],
+                  }),
+                ],
+              }),
+            },
+          }),
+        }),
+      ],
     });
   }
 }
