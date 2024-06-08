@@ -7,6 +7,9 @@
   "scripts": {
     "build": "npx projen build",
     "bump": "npx projen bump",
+    "bundle": "npx projen bundle",
+    "bundle:funcs/notification.lambda": "npx projen bundle:funcs/notification.lambda",
+    "bundle:funcs/notification.lambda:watch": "npx projen bundle:funcs/notification.lambda:watch",
     "clobber": "npx projen clobber",
     "compat": "npx projen compat",
     "compile": "npx projen compile",
@@ -31,12 +34,14 @@
     "organization": true
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.136",
     "@types/jest": "^29.5.12",
     "@types/node": "^18",
-    "@typescript-eslint/eslint-plugin": "^6",
-    "@typescript-eslint/parser": "^6",
-    "aws-cdk-lib": "2.100.0",
+    "@typescript-eslint/eslint-plugin": "^7",
+    "@typescript-eslint/parser": "^7",
+    "aws-cdk-lib": "2.120.0",
     "constructs": "10.0.5",
+    "esbuild": "^0.21.4",
     "eslint": "^8",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
@@ -54,7 +59,7 @@
     "typescript": "5.3.x"
   },
   "peerDependencies": {
-    "aws-cdk-lib": "^2.100.0",
+    "aws-cdk-lib": "^2.120.0",
     "constructs": "^10.0.5"
   },
   "keywords": [
