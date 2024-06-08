@@ -38,9 +38,11 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       topic.addSubscription(new subscriptions.EmailSubscription(email));
     }
 
+    const functionName = `lambda-func-log-subscription-${random}-func`;
+
     // 👇 notification Lambda Function
     const notificationFunction = new NotificationFunction(this, 'NotificationFunction', {
-      functionName: `lambda-function-log-notification-${random}-func`,
+      functionName: functionName,
       architecture: lambda.Architecture.ARM_64,
       timeout: cdk.Duration.minutes(3),
       role: new iam.Role(this, 'NotificationLambdaExecutionRole', {
@@ -50,8 +52,8 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
           iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
         ],
       }),
-      logGroup: new logs.LogGroup(this, 'NotificationFunctionLogGroup', {
-        // logGroupName: lambdaFunction.logGroup.logGroupName,
+      logGroup: new logs.LogGroup(this, 'LogNotificationFunctionLogGroup', {
+        logGroupName: `/aws/lambda/${functionName}`,
         retention: logs.RetentionDays.THREE_MONTHS,
         removalPolicy: cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
       }),
