@@ -87,27 +87,35 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       filterPattern: logs.FilterPattern.literal('{ $.level = "ERROR" || $.level = "WARN" }'),
     });
 
-    // EventBridge Rule
+    // Lambda Function Invocation Failure EventBridge Rule
     new events.Rule(this, 'LambdaFunctionLogSubscriptionFuncFailureRule', {
       ruleName: `lambda-func-log-subscription-${random}-func-failure-rule`,
       eventPattern: {
         source: ['lambda'],
         detailType: ['Lambda Function Invocation Result - Failure'],
-        resources: [
-          `${notificationFunction.functionArn}:*`,
-        ],
+        detail: {
+          requestContext: {
+            functionArn: [{
+              wildcard: `${notificationFunction.functionArn}:*`,
+            }],
+          },
+        },
       },
     });
 
-    // EventBridge Rule
+    // Lambda Function Invocation Success EventBridge Rule
     new events.Rule(this, 'LambdaFunctionLogSubscriptionFuncSuccessRule', {
       ruleName: `lambda-func-log-subscription-${random}-func-success-rule`,
       eventPattern: {
         source: ['lambda'],
         detailType: ['Lambda Function Invocation Result - Success'],
-        resources: [
-          `${notificationFunction.functionArn}:*`,
-        ],
+        detail: {
+          requestContext: {
+            functionArn: [{
+              wildcard: `${notificationFunction.functionArn}:*`,
+            }],
+          },
+        },
       },
     });
   }
