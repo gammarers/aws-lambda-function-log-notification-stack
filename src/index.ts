@@ -6,7 +6,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaDestinations from 'aws-cdk-lib/aws-lambda-destinations';
 import * as logs from 'aws-cdk-lib/aws-logs';
-import * as logsDestinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
@@ -82,12 +81,10 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
       onSuccess: new lambdaDestinations.EventBridgeDestination(),
       onFailure: new lambdaDestinations.EventBridgeDestination(),
     });
-
-    // サブスクリプションフィルターの作成
-    new logs.SubscriptionFilter(this, 'SubscriptionFilter', {
-      logGroup: logs.LogGroup.fromLogGroupName(this, 'LogGroup', props.logGroupName),
-      destination: new logsDestinations.LambdaDestination(notificationFunction),
-      filterPattern: logs.FilterPattern.literal('{ $.level = "ERROR" || $.level = "WARN" }'),
+    new cdk.CfnOutput(this, 'OutPutLogNotificationFunctionName', {
+      key: 'LogNotificationFunctionName',
+      value: notificationFunction.functionName,
+      exportName: 'LogNotificationFunctionName',
     });
 
     // stepfunction
