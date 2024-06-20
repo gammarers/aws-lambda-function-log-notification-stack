@@ -91,14 +91,15 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
     // Prepare Message
     const prepareMessage: sfn.Pass = new sfn.Pass(this, 'PrepareMessage', {
       parameters: {
-        Subject: sfn.JsonPath.format('😵 [Failur] AWS Lambda Function Invocation Failur Notification [{}][{}]',
+        Subject: sfn.JsonPath.format('😵[Failure] AWS Lambda Function Invocation Error Log Found [{}][{}]',
           sfn.JsonPath.stringAt('$.account'),
           sfn.JsonPath.stringAt('$.region'),
         ),
-        Message: sfn.JsonPath.format('Account : {}\nRegion : {}\nFunction : {}\nTimestamp : {}\nRequestId : {}\nErrorType : {}\nErrorMessage : {}\nStackTrace : \n{}',
+        Message: sfn.JsonPath.format('Account : {}\nRegion : {}\nLogGroup : {}\nLogStream : {}\nTimestamp : {}\nRequestId : {}\nErrorType : {}\nErrorMessage : {}\nStackTrace : \n{}',
           sfn.JsonPath.stringAt('$.account'),
           sfn.JsonPath.stringAt('$.region'),
-          sfn.JsonPath.stringAt('$.detail.requestContext.functionArn'),
+          sfn.JsonPath.stringAt('$.detail.responsePayload.logGroup'),
+          sfn.JsonPath.stringAt('$.detail.responsePayload.logStream'),
           sfn.JsonPath.stringAt('$.Temp.Log.Parsed.timestamp'),
           sfn.JsonPath.stringAt('$.Temp.Log.Parsed.requestId'),
           sfn.JsonPath.stringAt('$.Temp.Log.Parsed.message.errorType'),
