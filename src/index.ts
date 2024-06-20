@@ -91,7 +91,7 @@ export class LambdaFunctionLogNotificationStack extends cdk.Stack {
     // Prepare Message
     const prepareMessage: sfn.Pass = new sfn.Pass(this, 'PrepareMessage', {
       parameters: {
-        Subject: sfn.JsonPath.format('😵 [Failur] AWS Lambda Function Invocation Failur Notification [{}][{}]',
+        Subject: sfn.JsonPath.format('😵[Failure] AWS Lambda Function Invocation Error Log Found [{}][{}]',
           sfn.JsonPath.stringAt('$.account'),
           sfn.JsonPath.stringAt('$.region'),
         ),
