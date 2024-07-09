@@ -1989,9 +1989,9 @@ downlevel-dts@^0.11.0:
     typescript next
 
 electron-to-chromium@^1.4.796:
-  version "1.4.818"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.818.tgz#7762c8bfd15a07c3833b7f5deed990e9e5a4c24f"
-  integrity sha512-eGvIk2V0dGImV9gWLq8fDfTTsCAeMDwZqEPMr+jMInxZdnp9Us8UpovYpRCf9NQ7VOFgrN2doNSgvISbsbNpxA==
+  version "1.4.820"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.820.tgz#1195660c157535392a09442540a08ee63fea8c40"
+  integrity sha512-kK/4O/YunacfboFEk/BDf7VO1HoPmDudLTJAU9NmXIOSjsV7qVIX3OrI4REZo0VmdqhcpUcncQc6N8Q3aEXlHg==
 
 emittery@^0.13.1:
   version "0.13.1"
@@ -4219,10 +4219,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen@^0.84.0:
-  version "0.84.0"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.84.0.tgz#d142fdbab40bc2a952b6d1ccb240914d773d58df"
-  integrity sha512-HXbtJiZVJyouVGbwBHMYD1REOdkmekvfrcJLH0G0ky6A1PinM5/SVm0oDccJVZpxIbZHbctSyAMLirhvtJh9wg==
+projen@^0.84.3:
+  version "0.84.3"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.84.3.tgz#344df133ffd8b14c199743c5a35d349b55574d02"
+  integrity sha512-47Mf61Sxm17SfUwEam5XIW+S4lKjcXsi3Z2AiUP8XqFfDS94vNvG6/9Od625oNQoa5YIB3R1JQQSFuc4Tre/Wg==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
@@ -5040,9 +5040,9 @@ typescript@5.3.x, typescript@~5.3:
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
 
 typescript@next:
-  version "5.6.0-dev.20240708"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.0-dev.20240708.tgz#0508635b6e236f9ec63643d3b3f34ed15f81e3c1"
-  integrity sha512-znYUhYs3kjemvesSDNvtU17+eUiQnX4RNegVbFdWQ54mXzYrg+0nI2isOO/RQCeGHFuO1M6uR/2/bC+mcDnAVQ==
+  version "5.6.0-dev.20240709"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.0-dev.20240709.tgz#5bfe61e1d6f259615cbae0ddcb68ddc7316ab2d3"
+  integrity sha512-YNN8Gh/5qODspi9crUXshwnnzwaGhZ+kZYQAVDW4mPXTGRVOhIl0LVB9cOGsBH2igmuLSOIZlY3fOhZLVIdbqQ==
 
 uglify-js@^3.1.4:
   version "3.18.0"
