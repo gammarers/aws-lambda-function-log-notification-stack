@@ -755,7 +755,7 @@
     chalk "^4.1.2"
     semver "^7.6.3"
 
-"@jsii/spec@^1.103.0", "@jsii/spec@^1.103.1":
+"@jsii/spec@^1.103.1":
   version "1.103.1"
   resolved "https://registry.yarnpkg.com/@jsii/spec/-/spec-1.103.1.tgz#2f8e61c603238c56d30d26100eb7ee9f51aa35b8"
   integrity sha512-14OGYM3DjEBjUOUaih+bwPgkhFnR8L9TSNSM0oE0L0hjWscTapvClqOgMDJ1ID52qkROCAgKl1d71Vmm4v0Buw==
@@ -2045,9 +2045,9 @@ ejs@^3.1.10:
     jake "^10.8.5"
 
 electron-to-chromium@^1.5.4:
-  version "1.5.23"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.23.tgz#6dabd8f7fec5cbf618b732ff4c42950dcc7a3be5"
-  integrity sha512-mBhODedOXg4v5QWwl21DjM5amzjmI1zw9EPrPK/5Wx7C8jt33bpZNrC7OhHUG3pxRtbLpr3W2dXT+Ph1SsfRZA==
+  version "1.5.24"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.24.tgz#b3cd2f71b7a84bac340d862e3b7b0aadf48478de"
+  integrity sha512-0x0wLCmpdKFCi9ulhvYZebgcPmHTkFVUfU2wzDykadkslKwT4oAmDTHEKLnlrDsMGZe4B+ksn8quZfZjYsBetA==
 
 emittery@^0.13.1:
   version "0.13.1"
@@ -3659,16 +3659,16 @@ jsii-diff@^1.103.1:
     yargs "^16.2.0"
 
 jsii-docgen@^10.5.0:
-  version "10.5.3"
-  resolved "https://registry.yarnpkg.com/jsii-docgen/-/jsii-docgen-10.5.3.tgz#f5bfa35f9737914cafc4f57752766831d685a6db"
-  integrity sha512-H6QAaaoRG5/AnnuQWZcl8RKO09ButL8VYCuabbMr2lZBb2q9j15jnBhiQljtNVw/TvFikNn4aJ12p3Dra8DKbw==
+  version "10.5.4"
+  resolved "https://registry.yarnpkg.com/jsii-docgen/-/jsii-docgen-10.5.4.tgz#2c478ebf6c779d334a4363e608fa386a2449068e"
+  integrity sha512-DPsvey7TaaAdwHi3htjtVzbQCwDrWo/DcuGXlqjis8Ltu05Xg9WN/gX/3FQohf5b/hmM39ajq2x8yzVvP/OwYQ==
   dependencies:
-    "@jsii/spec" "^1.103.0"
+    "@jsii/spec" "^1.103.1"
     case "^1.6.3"
     fs-extra "^10.1.0"
     glob "^8.1.0"
     glob-promise "^6.0.7"
-    jsii-reflect "^1.103.0"
+    jsii-reflect "^1.103.1"
     semver "^7.6.3"
     yargs "^16.2.0"
 
@@ -3690,7 +3690,7 @@ jsii-pacmak@^1.103.1:
     xmlbuilder "^15.1.1"
     yargs "^16.2.0"
 
-jsii-reflect@^1.103.0, jsii-reflect@^1.103.1:
+jsii-reflect@^1.103.1:
   version "1.103.1"
   resolved "https://registry.yarnpkg.com/jsii-reflect/-/jsii-reflect-1.103.1.tgz#486ea9077a20ac244d0127c08388c2bf33de4f03"
   integrity sha512-kFm09KL9dlxyxesf7mtm12+4vVaRin5YI4Eca2OOa0X28HNVpr62/n21T3BuAAhFaI0nkiUoJuBWtdOz475BSQ==
@@ -5225,9 +5225,9 @@ typescript@5.3.x, typescript@~5.3:
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
 
 typescript@next:
-  version "5.7.0-dev.20240916"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.0-dev.20240916.tgz#06baa9d7d36f736a0e1d998cd9cf8bfa1a186b4f"
-  integrity sha512-PvqtY2wVBTIlHc0+Vs3w3UNntEzSho0uNm56c8D3mFINC/WFcEyOszkwxjSKyqVwEv62zl6xg+p7Ilt3H6yOJA==
+  version "5.7.0-dev.20240917"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.0-dev.20240917.tgz#bee5cc2615b28aaf54f9e267a07aeac5ad49b3bc"
+  integrity sha512-LoeyRa9RbB6lMasZvBmepDPrI6KNHURSleqbQ4BL4lxvXbCAQkMgmRzqyjA2DJE0ytuj5OEPFU5k/g3f9GaQKA==
 
 uglify-js@^3.1.4:
   version "3.19.3"
